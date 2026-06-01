@@ -64,6 +64,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 /*
 |--------------------------------------------------------------------------
+| TOTAL GUESTS
+|--------------------------------------------------------------------------
+*/
+
+$totalGuestsResult = $conn->query(
+    "SELECT COUNT(*) AS total FROM guests"
+);
+
+$totalGuests = $totalGuestsResult->fetch_assoc()["total"];
+
+/*
+|--------------------------------------------------------------------------
 | SEARCH
 |--------------------------------------------------------------------------
 */
@@ -132,6 +144,23 @@ body{
     box-shadow:0 0 10px rgba(0,0,0,0.1);
 }
 
+.stats-card{
+    background:#007bff;
+    color:white;
+    padding:20px;
+    border-radius:10px;
+    margin-bottom:20px;
+}
+
+.stats-card h3{
+    margin:0;
+}
+
+.stats-card h1{
+    margin-top:10px;
+    margin-bottom:0;
+}
+
 input{
     width:100%;
     padding:10px;
@@ -171,16 +200,17 @@ th{
     background:#f0f0f0;
 }
 
-.delete-btn{
-    background:#dc3545;
+.edit-btn{
+    background:#28a745;
     color:white;
     padding:6px 12px;
     border-radius:5px;
     text-decoration:none;
+    margin-right:5px;
 }
 
-.edit-btn{
-    background:#28a745;
+.delete-btn{
+    background:#dc3545;
     color:white;
     padding:6px 12px;
     border-radius:5px;
@@ -198,108 +228,113 @@ th{
 
 <div class="card">
 
-<h1>🏨 Hotel Management System</h1>
+    <h1>🏨 Hotel Management System</h1>
 
-<h2>Add Guest</h2>
+    <div class="stats-card">
+        <h3>Total Guests</h3>
+        <h1><?= $totalGuests ?></h1>
+    </div>
 
-<form method="POST">
+    <h2>Add Guest</h2>
 
-    <input
-        type="text"
-        name="name"
-        placeholder="Full Name"
-        required
-    >
+    <form method="POST">
 
-    <input
-        type="email"
-        name="email"
-        placeholder="Email"
-        required
-    >
-
-    <input
-        type="text"
-        name="phone"
-        placeholder="Phone Number"
-        required
-    >
-
-    <button type="submit">
-        Add Guest
-    </button>
-
-</form>
-
-<hr>
-
-<h2>Search Guest</h2>
-
-<form method="GET" class="search-box">
-
-    <input
-        type="text"
-        name="search"
-        placeholder="Search by name..."
-        value="<?= htmlspecialchars($search) ?>"
-    >
-
-    <button type="submit">
-        Search
-    </button>
-
-</form>
-
-<hr>
-
-<h2>Guest List</h2>
-
-<table>
-
-<tr>
-    <th>ID</th>
-    <th>Name</th>
-    <th>Email</th>
-    <th>Phone</th>
-    <th>Action</th>
-</tr>
-
-<?php foreach($guests as $guest): ?>
-
-<tr>
-
-    <td><?= $guest["id"] ?></td>
-
-    <td><?= htmlspecialchars($guest["name"]) ?></td>
-
-    <td><?= htmlspecialchars($guest["email"]) ?></td>
-
-    <td><?= htmlspecialchars($guest["phone"]) ?></td>
-
-    <td>
-
-        <a
-            class="edit-btn"
-            href="php/edit.php?id=<?= $guest["id"] ?>"
+        <input
+            type="text"
+            name="name"
+            placeholder="Full Name"
+            required
         >
-            Edit
-        </a>
 
-        <a
-            class="delete-btn"
-            href="?delete=<?= $guest["id"] ?>"
-            onclick="return confirm('Delete this guest?')"
+        <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            required
         >
-            Delete
-        </a>
 
-    </td>
+        <input
+            type="text"
+            name="phone"
+            placeholder="Phone Number"
+            required
+        >
 
-</tr>
+        <button type="submit">
+            Add Guest
+        </button>
 
-<?php endforeach; ?>
+    </form>
 
-</table>
+    <hr>
+
+    <h2>Search Guest</h2>
+
+    <form method="GET" class="search-box">
+
+        <input
+            type="text"
+            name="search"
+            placeholder="Search by name..."
+            value="<?= htmlspecialchars($search) ?>"
+        >
+
+        <button type="submit">
+            Search
+        </button>
+
+    </form>
+
+    <hr>
+
+    <h2>Guest List</h2>
+
+    <table>
+
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Action</th>
+        </tr>
+
+        <?php foreach($guests as $guest): ?>
+
+        <tr>
+
+            <td><?= $guest["id"] ?></td>
+
+            <td><?= htmlspecialchars($guest["name"]) ?></td>
+
+            <td><?= htmlspecialchars($guest["email"]) ?></td>
+
+            <td><?= htmlspecialchars($guest["phone"]) ?></td>
+
+            <td>
+
+                <a
+                    class="edit-btn"
+                    href="php/edit.php?id=<?= $guest["id"] ?>"
+                >
+                    Edit
+                </a>
+
+                <a
+                    class="delete-btn"
+                    href="?delete=<?= $guest["id"] ?>"
+                    onclick="return confirm('Delete this guest?')"
+                >
+                    Delete
+                </a>
+
+            </td>
+
+        </tr>
+
+        <?php endforeach; ?>
+
+    </table>
 
 </div>
 
