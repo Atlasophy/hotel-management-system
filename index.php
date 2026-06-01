@@ -11,14 +11,43 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
+/*
+|--------------------------------------------------------------------------
+| DELETE GUEST
+|--------------------------------------------------------------------------
+*/
 
-    $name = $_POST["name"];
-    $email = $_POST["email"];
-    $phone = $_POST["phone"];
+if (isset($_GET["delete"])) {
+
+    $id = (int)$_GET["delete"];
 
     $stmt = $conn->prepare(
-        "INSERT INTO guests (name, email, phone) VALUES (?, ?, ?)"
+        "DELETE FROM guests WHERE id = ?"
+    );
+
+    $stmt->bind_param("i", $id);
+
+    $stmt->execute();
+
+    header("Location: index.php");
+    exit();
+}
+
+/*
+|--------------------------------------------------------------------------
+| ADD GUEST
+|--------------------------------------------------------------------------
+*/
+
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+
+    $name = trim($_POST["name"]);
+    $email = trim($_POST["email"]);
+    $phone = trim($_POST["phone"]);
+
+    $stmt = $conn->prepare(
+        "INSERT INTO guests (name, email, phone)
+         VALUES (?, ?, ?)"
     );
 
     $stmt->bind_param(
@@ -29,7 +58,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     );
 
     $stmt->execute();
+
+    header("Location: index.php");
+    exit();
 }
+
+/*
+|--------------------------------------------------------------------------
+| LOAD GUESTS
+|--------------------------------------------------------------------------
+*/
 
 $result = $conn->query(
     "SELECT * FROM guests ORDER BY id DESC"
@@ -61,7 +99,7 @@ while ($row = $result->fetch_assoc()) {
             background:white;
             padding:20px;
             border-radius:10px;
-            max-width:800px;
+            max-width:900px;
             margin:auto;
             box-shadow:0 0 10px rgba(0,0,0,0.1);
         }
@@ -76,6 +114,14 @@ while ($row = $result->fetch_assoc()) {
         button{
             padding:10px 20px;
             cursor:pointer;
+            border:none;
+            border-radius:5px;
+            background:#007bff;
+            color:white;
+        }
+
+        button:hover{
+            opacity:0.9;
         }
 
         table{
@@ -89,12 +135,24 @@ while ($row = $result->fetch_assoc()) {
         }
 
         th, td{
-            padding:10px;
+            padding:12px;
             text-align:left;
         }
 
         th{
             background:#f0f0f0;
+        }
+
+        .delete-btn{
+            background:#dc3545;
+            color:white;
+            padding:6px 12px;
+            border-radius:5px;
+            text-decoration:none;
+        }
+
+        .delete-btn:hover{
+            opacity:0.8;
         }
 
     </style>
@@ -148,15 +206,28 @@ while ($row = $result->fetch_assoc()) {
             <th>Name</th>
             <th>Email</th>
             <th>Phone</th>
+            <th>Action</th>
         </tr>
 
         <?php foreach($guests as $guest): ?>
 
         <tr>
+
             <td><?= $guest["id"] ?></td>
-            <td><?= $guest["name"] ?></td>
-            <td><?= $guest["email"] ?></td>
-            <td><?= $guest["phone"] ?></td>
+            <td><?= htmlspecialchars($guest["name"]) ?></td>
+            <td><?= htmlspecialchars($guest["email"]) ?></td>
+            <td><?= htmlspecialchars($guest["phone"]) ?></td>
+
+            <td>
+                <a
+                    class="delete-btn"
+                    href="?delete=<?= $guest["id"] ?>"
+                    onclick="return confirm('Delete this guest?')"
+                >
+                    Delete
+                </a>
+            </td>
+
         </tr>
 
         <?php endforeach; ?>
